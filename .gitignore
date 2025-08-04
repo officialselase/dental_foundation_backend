@@ -1,0 +1,12 @@
+# Ignore virtualenvs
+../dental_foundation_env/
+venv/
+.env
+__pycache__/
+*.pyc
+*.log
+db.sqlite3
+staticfiles/
+media/
+# Ignore IDE/editor specific files
+# ignore
