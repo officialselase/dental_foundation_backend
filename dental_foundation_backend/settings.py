@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from decouple import config
 
@@ -21,12 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9v+ilc9e%(7pdbi1egl775=iqirwfnnqg+a%of8f80dnp9!5(r'
+SECRET_KEY = config('SECRET_KEY')  # Use .env in production
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool) 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='*').split(',')
+
 
 
 # Application definition
@@ -38,18 +40,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #Third-party
     'rest_framework',  # Django REST Framework
     'corsheaders',  # For handling CORS headers
     'ckeditor',  # For rich text editing
     'ckeditor_uploader',  # For CKEditor file(image uploads withen the editor) uploads
     'django_filters',  # For filtering in DRF
+
+    #Local apps
     'core_api', # include my API application
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # position important
+    'corsheaders.middleware.CorsMiddleware', # position important, must be high in the list
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -58,7 +64,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL AND WSGI
 ROOT_URLCONF = 'dental_foundation_backend.urls'
+WSGI_APPLICATION = 'dental_foundation_backend.wsgi.application'
 
 TEMPLATES = [
     {
@@ -74,9 +82,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'dental_foundation_backend.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -106,18 +111,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-import os
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+#__STATIC AND MEDIA FILES
 # Media files (user uploaded content like blog images, etc.)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Directory where media files will be stored
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Directory where static files will be collected
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -134,20 +134,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", # Your React development server
-    "http://127.0.0.1:5173",
-    # Add your production frontend URL when deployed
-]
-# Or, for more permissive (but less secure) development:
-CORS_ALLOW_ALL_ORIGINS = True # Only for development!
+# CORS SETTINGS
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
 
 # CKEditor settings
 CKEDITOR_UPLOAD_PATH = "uploads/"  # Directory where uploaded files will be stored

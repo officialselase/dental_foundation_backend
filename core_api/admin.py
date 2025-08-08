@@ -1,22 +1,21 @@
+# core_api/admin.py
 from django.contrib import admin
 from .models import (
     BlogPost, Event, ContactMessage, NewsletterSubscriber, Resource,
     VolunteerApplication, PartnershipInquiry, TeamMember, GalleryItem,
-    Category # NEW: Import Category
+    Category, ImpactStat, TransformationStory
 )
 
-# --- Register Category Model ---
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)} # Auto-generate slug from name
+    prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
 
-# Register your existing models here 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'category', 'published_date', 'is_active') # Added 'category'
-    list_filter = ('is_active', 'category', 'published_date') # Added 'category' to filter
+    list_display = ('title', 'author', 'category', 'published_date', 'is_active')
+    list_filter = ('is_active', 'category', 'published_date')
     search_fields = ('title', 'content', 'author')
     prepopulated_fields = {'slug': ('title',)}
 
@@ -85,12 +84,10 @@ class TeamMemberAdmin(admin.ModelAdmin):
     search_fields = ('name', 'role', 'bio')
     list_editable = ('order', 'is_active')
 
-# --- UPDATED: GalleryItemAdmin ---
 @admin.register(GalleryItem)
 class GalleryItemAdmin(admin.ModelAdmin):
-    # Added 'category' to list_display and list_filter
     list_display = ('title', 'category', 'upload_date', 'is_published', 'has_image', 'has_video')
-    list_filter = ('is_published', 'category', 'upload_date') # 'category' is now a ForeignKey, so it works naturally
+    list_filter = ('is_published', 'category', 'upload_date')
     search_fields = ('title', 'description')
     readonly_fields = ('upload_date',)
     list_editable = ('is_published',)
@@ -104,3 +101,14 @@ class GalleryItemAdmin(admin.ModelAdmin):
         return bool(obj.video)
     has_video.boolean = True
     has_video.short_description = "Video"
+
+@admin.register(ImpactStat)
+class ImpactStatAdmin(admin.ModelAdmin):
+    list_display = ('title', 'value', 'order')
+    list_editable = ('order',)
+
+@admin.register(TransformationStory)
+class TransformationStoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'location', 'is_published', 'created_at')
+    list_filter = ('is_published',)
+    search_fields = ('name', 'location', 'story')

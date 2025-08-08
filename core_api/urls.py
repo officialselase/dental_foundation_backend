@@ -7,7 +7,7 @@ from .views import (
     BlogPostViewSet, EventViewSet, ResourceViewSet,
     ContactMessageCreateView, NewsletterSubscriberCreateView,
     VolunteerApplicationCreateView, PartnershipInquiryCreateView, # New form views
-    TeamMemberViewSet, GalleryItemViewSet, CategoryViewSet # New data views
+    TeamMemberViewSet, GalleryItemViewSet, CategoryViewSet, ImpactStatViewSet, TransformationStoryViewSet # New data views
 )
 
 # Create a router and register our viewsets with it.
@@ -20,7 +20,8 @@ router.register(r'resources', ResourceViewSet, basename='resource') # Register R
 router.register(r'team-members', TeamMemberViewSet, basename='team-member') # NEW: Team Members API
 router.register(r'gallery-items', GalleryItemViewSet, basename='gallery-item') # NEW: Gallery API
 router.register(r'categories', CategoryViewSet, basename='category') # NEW: Categories API
-
+router.register(r'impact-stats', ImpactStatViewSet, basename='impact-stat') #New: ImpactStat API
+router.register(r'transformation-stories', TransformationStoryViewSet, basename='transformation-story') 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)), # Includes all URLs registered with the router

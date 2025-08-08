@@ -3,7 +3,8 @@ from django.utils import timezone
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.template.defaultfilters import slugify
 
-# --- Define the Category Model FIRST ---
+
+# --- Category Model ---
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
@@ -19,21 +20,18 @@ class Category(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
-# --- Now define BlogPost (which references Category) ---
+
+# --- BlogPost Model ---
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, help_text="A unique slug for the URL, e.g., 'my-awesome-blog-post'")
+    slug = models.SlugField(max_length=200, unique=True, help_text="Unique slug for the URL")
     content = RichTextUploadingField()
-    excerpt = models.TextField(
-        blank=True,
-        null=True,
-        help_text="A short summary or teaser of the blog post, usually plain text. Used for list views."
-    )
+    excerpt = models.TextField(blank=True, null=True, help_text="Short summary for list views.")
     author = models.CharField(max_length=100)
     published_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to='blog_images/', blank=True, null=True)
-    is_active = models.BooleanField(default=True, help_text="Whether the blog post is currently active/visible")
+    is_active = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='blog_posts')
 
     class Meta:
@@ -48,16 +46,15 @@ class BlogPost(models.Model):
         super().save(*args, **kwargs)
 
 
-# --- Rest of your models should follow ---
-# Event model
+# --- Event Model ---
 class Event(models.Model):
-    title = models.CharField(max_length=200, help_text="Name of the event")
-    slug = models.SlugField(max_length=200, unique=True, help_text="A unique slug for the URL, e.g., 'annual-dental-camp'")
-    description = models.TextField(help_text="Detailed description of the event")
-    event_date = models.DateTimeField(help_text="Date and time of the event")
-    location = models.CharField(max_length=255, help_text="Venue or online link for the event")
-    image = models.ImageField(upload_to='event_images/', blank=True, null=True, help_text="Optional image for the event")
-    is_active = models.BooleanField(default=True, help_text="Whether the event is currently active/visible")
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+    description = models.TextField()
+    event_date = models.DateTimeField()
+    location = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='event_images/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,14 +64,15 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-# ContactMessage model
+
+# --- ContactMessage Model ---
 class ContactMessage(models.Model):
-    name = models.CharField(max_length=100, help_text="Name of the person sending the message")
-    email = models.EmailField(help_text="Email address for reply")
-    subject = models.CharField(max_length=200, blank=True, null=True, help_text="Subject of the message (optional)")
-    message = models.TextField(help_text="The content of the message")
-    submitted_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp when the message was sent")
-    is_read = models.BooleanField(default=False, help_text="Mark if the message has been read by an admin")
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200, blank=True, null=True)
+    message = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-submitted_at']
@@ -82,11 +80,12 @@ class ContactMessage(models.Model):
     def __str__(self):
         return f"Message from {self.name} ({self.email})"
 
-# NewsletterSubscriber model
+
+# --- NewsletterSubscriber Model ---
 class NewsletterSubscriber(models.Model):
-    email = models.EmailField(unique=True, help_text="Email address of the subscriber")
-    subscribed_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp when the user subscribed")
-    is_active = models.BooleanField(default=True, help_text="Whether the subscription is currently active")
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['-subscribed_at']
@@ -94,13 +93,14 @@ class NewsletterSubscriber(models.Model):
     def __str__(self):
         return self.email
 
-# Resource model
+
+# --- Resource Model ---
 class Resource(models.Model):
-    title = models.CharField(max_length=200, help_text="Title of the downloadable resource")
-    description = models.TextField(blank=True, null=True, help_text="Brief description of the resource")
-    file = models.FileField(upload_to='resources/', help_text="The actual file for download (PDFs, documents, etc.)")
-    uploaded_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp when the resource was uploaded")
-    is_public = models.BooleanField(default=True, help_text="Whether the resource is publicly available")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='resources/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['-uploaded_at']
@@ -108,7 +108,8 @@ class Resource(models.Model):
     def __str__(self):
         return self.title
 
-# --- NEW: Volunteer Application Model ---
+
+# --- Volunteer Application Model ---
 class VolunteerApplication(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -130,15 +131,16 @@ class VolunteerApplication(models.Model):
         ('Rejected', 'Rejected'),
     ])
 
-    def __str__(self):
-        return f"Volunteer: {self.name} - {self.area_of_interest}"
-
     class Meta:
         verbose_name = "Volunteer Application"
         verbose_name_plural = "Volunteer Applications"
         ordering = ['-application_date']
 
-# --- NEW: Partnership Inquiry Model ---
+    def __str__(self):
+        return f"{self.name} - {self.area_of_interest}"
+
+
+# --- Partnership Inquiry Model ---
 class PartnershipInquiry(models.Model):
     organization_name = models.CharField(max_length=255)
     contact_person = models.CharField(max_length=255)
@@ -160,15 +162,16 @@ class PartnershipInquiry(models.Model):
         ('Completed', 'Completed'),
     ])
 
-    def __str__(self):
-        return f"Partnership: {self.organization_name} - {self.contact_person}"
-
     class Meta:
         verbose_name = "Partnership Inquiry"
         verbose_name_plural = "Partnership Inquiries"
         ordering = ['-inquiry_date']
 
-# --- NEW: Team Member Model ---
+    def __str__(self):
+        return f"{self.organization_name} - {self.contact_person}"
+
+
+# --- Team Member Model ---
 class TeamMember(models.Model):
     name = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
@@ -177,42 +180,62 @@ class TeamMember(models.Model):
     linkedin_url = models.URLField(max_length=500, blank=True, null=True)
     twitter_url = models.URLField(max_length=500, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    order = models.IntegerField(default=0, help_text="Order in which team members appear")
+    order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.name} ({self.role})"
 
     class Meta:
         verbose_name = "Team Member"
         verbose_name_plural = "Team Members"
         ordering = ['order', 'name']
 
-# --- UPDATED: Gallery Item Model ---
+    def __str__(self):
+        return f"{self.name} ({self.role})"
+
+
+# --- Gallery Item Model ---
 class GalleryItem(models.Model):
     image = models.ImageField(upload_to='gallery_images/', blank=True, null=True)
-    video = models.FileField(upload_to='gallery_videos/', blank=True, null=True, help_text="Optional: Upload a video file instead of an image.")
+    video = models.FileField(upload_to='gallery_videos/', blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     upload_date = models.DateTimeField(default=timezone.now)
-    # --- CHANGED: `category` is now a ForeignKey to the Category model ---
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL, # If a category is deleted, set this field to NULL
-        null=True,                # Allow null values in the database
-        blank=True,               # Allow the field to be blank in forms/admin
-        related_name='gallery_items', # Allows reverse lookup: category.gallery_items.all()
-        help_text="Assign a category (e.g., Program, Location) to this gallery item."
-    )
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_items')
     is_published = models.BooleanField(default=True)
-
-    def __str__(self):
-        # Include category name in string representation for clarity
-        if self.category:
-            return f"{self.title} ({self.category.name})"
-        return self.title
 
     class Meta:
         verbose_name = "Gallery Item"
         verbose_name_plural = "Gallery Items"
         ordering = ['-upload_date']
+
+    def __str__(self):
+        return f"{self.title} ({self.category.name})" if self.category else self.title
+
+
+# --- NEW: ImpactStat Model ---
+class ImpactStat(models.Model):
+    title = models.CharField(max_length=100)
+    value = models.CharField(max_length=50)  # e.g. "10,000+", "85%"
+    icon = models.ImageField(upload_to='impact_icons/', null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.title}: {self.value}"
+
+
+# --- NEW: TransformationStory Model ---
+class TransformationStory(models.Model):
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, blank=True)
+    story = models.TextField()
+    image = models.ImageField(upload_to='transformation_stories/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Story by {self.name}"
